@@ -11,11 +11,17 @@ def post_list(request):
     posts = Post.objects.all()
     return Response(serializer(instance=posts, many=True).data)
 
-@api_view(['GET'])
+@api_view(['GET', 'PUT'])
 def post_detail(request, pk):
     serializer = PostSerializer
     post = Post.objects.filter(pk=pk).first() #이거 별론가?
     if post:
+        if (request.method == 'PUT'):
+            post.title = request.data.get('title') if request.data.get('title') is not None else post.title
+            post.text = request.data.get('text') if request.data.get('text') is not None else post.text
+            post.save()
+            post.publish()
+
         return Response(serializer(post).data)
     else:
         return Response({'message': 'no matching post'}, status=status.HTTP_404_NOT_FOUND)
