@@ -12,3 +12,8 @@ class PostTest(TestCase):
         assert post.published_date is None
         post.publish()
         assert post.published_date < datetime.datetime.now()
+    
+    def test_post_list(self):
+        posts = Post.objects.all()
+        post_list_res = self.client.get('')
+        assert len(post_list_res.data) == len(posts)
