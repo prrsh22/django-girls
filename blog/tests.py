@@ -17,3 +17,20 @@ class PostTest(TestCase):
         posts = Post.objects.all()
         post_list_res = self.client.get('')
         assert len(post_list_res.data) == len(posts)
+
+    def test_new_post(self):
+        #given
+        user = User.objects.create(username='test')
+        self.client.force_login(user=user)
+        post_number_before_create = len(Post.objects.all())
+
+        #when
+        created_post = self.client.post('/new_post', {'title': '', 'text': ''})
+
+        #then
+        post_number_after_create = len(Post.objects.all())
+        assert created_post.status_code == 201
+        assert post_number_after_create == post_number_before_create + 1
+    
+    
+        
