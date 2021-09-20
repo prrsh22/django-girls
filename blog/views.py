@@ -35,6 +35,6 @@ def new_post(request):
     serializer = PostSerializer
     title = request.data.get('title')
     text = request.data.get('text')
-    author = User.objects.get(username='admin') #임시
+    author = request.user if not request.user.is_anonymous else User.objects.get(username='admin') #임시
     created_post = Post.objects.create(title=title, text=text, author=author)
     return Response(serializer(created_post).data, status=status.HTTP_201_CREATED)
