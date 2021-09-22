@@ -52,3 +52,17 @@ class PostTest(TestCase):
 
         #then
         assert response.status_code == 200
+
+    def test_update_post(self):
+        #given
+        author = User.objects.create(username="hey")
+        post = Post.objects.create(author=author, title="test title", text="test text")
+
+        #when
+        self.client.patch(f'/post/{post.id}', {"title": "updated title", "text": "updated text"}, content_type='application/json')
+
+        #then
+        updated_post = Post.objects.get(id=post.id)
+        assert updated_post.title == 'updated title'
+        assert updated_post.text == 'updated text'
+
