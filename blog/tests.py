@@ -1,3 +1,5 @@
+from rest_framework import status
+
 from blog.models import Post
 from django.contrib.auth.models import User
 from django.test import TestCase
@@ -6,22 +8,50 @@ import datetime
 
 # Create your tests here.
 class PostTest(TestCase):
-    def test_post_publish(self):
-        admin = User.objects.create(username="hey")
-        post = Post.objects.create(author=admin, title="", text="")
-        assert post.published_date is None
-        post.publish()
-        assert post.published_date < datetime.datetime.now()
-    
-    def test_post_list(self):
-        posts = Post.objects.all()
-        post_list_res = self.client.get('')
-        assert len(post_list_res.data) == len(posts)
+    @classmethod
+    def setUpTestData(cls):
+        cls.admin = User.objects.create(username="admin")
 
-    def test_new_post(self):
+    def setUp(self):
+        self.post = Post.objects.create(author=self.admin, title="title", text="text")
+
+    def test_post가_publish되기전에는_published_date가_null이다(self):
+        assert self.post.published_date is None
+
+    def test_post가_publish되면_publish_date가_Null이_아니다(self):
+        # given
+        self.post.publish()
+
+        # when
+        date = self.post.published_date
+
+        # then
+        assert abs(date - datetime.datetime.now()) < datetime.timedelta(seconds=10)
+
+    def test_post의_Listview는_비어있지않다(self):
+        # given
+        Post.objects.create(author=self.admin, title="another", text="post")
+
+        # when
+        get = self.client.get('')
+
+        # then
+        assert get.status_code == status.HTTP_200_OK
+        assert len(get.data) == 2
+
+    def test_post가_생성되면_201을_반환한다(self):
         #given
-        user = User.objects.create(username='test')
-        self.client.force_login(user=user)
+        self.client.force_login(user=self.admin)
+
+        #when
+        created_post = self.client.post('/new_post', {'title': '', 'text': ''})
+
+        #then
+        assert created_post.status_code == 201
+
+    def test_post가_생성되면_글수가_늘어난다(self):
+        #given
+        self.client.force_login(user=self.admin)
         post_number_before_create = len(Post.objects.all())
 
         #when
@@ -29,40 +59,30 @@ class PostTest(TestCase):
 
         #then
         post_number_after_create = len(Post.objects.all())
-        assert created_post.status_code == 201
         assert post_number_after_create == post_number_before_create + 1
     
-    def test_GET_not_existing_post_return_404(self):
+    def test_없는_post를_조회하면_404를_반환한다(self):
         #given
         number_of_posts = len(Post.objects.all())
 
         #when
-        response = self.client.get(f'/post/{number_of_posts+1}')
+        get = self.client.get(f'/post/{number_of_posts+1}')
 
         #then
-        assert response.status_code == 404
+        assert get.status_code == 404
     
-    def test_GET_existing_post_return_200(self):
-        #given
-        author = User.objects.create(username="hey")
-        post = Post.objects.create(author=author, title="", text="")
-
+    def test_있는_post를_조회하면_200을_반환한다(self):
         #when
-        response = self.client.get(f'/post/{post.id}')
+        get = self.client.get(f'/post/{self.post.id}')
 
         #then
-        assert response.status_code == 200
+        assert get.status_code == 200
 
-    def test_update_post(self):
-        #given
-        author = User.objects.create(username="hey")
-        post = Post.objects.create(author=author, title="test title", text="test text")
-
+    def test_post를_patch하면_수정된다(self):
         #when
-        self.client.patch(f'/post/{post.id}', {"title": "updated title", "text": "updated text"}, content_type='application/json')
+        self.client.patch(f'/post/{self.post.id}', {"title": "updated title", "text": "updated text"}, content_type='application/json')
 
         #then
-        updated_post = Post.objects.get(id=post.id)
+        updated_post = Post.objects.get(id=self.post.id)
         assert updated_post.title == 'updated title'
         assert updated_post.text == 'updated text'
-
