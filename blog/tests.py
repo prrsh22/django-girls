@@ -49,7 +49,7 @@ class PostTest(TestCase):
         #then
         assert created_post.status_code == 201
 
-    def test_post가_생성되면_글수가_늘어난다(self):
+    def test_post가_생성되면_글_수가_늘어난다(self):
         #given
         self.client.force_login(user=self.admin)
         post_number_before_create = len(Post.objects.all())
@@ -86,3 +86,14 @@ class PostTest(TestCase):
         updated_post = Post.objects.get(id=self.post.id)
         assert updated_post.title == 'updated title'
         assert updated_post.text == 'updated text'
+    
+    def test_post를_delete하면_글_수가_줄어든다(self):
+        #given
+        number_of_posts_before_delete = len(Post.objects.all())
+
+        #when
+        self.client.delete(f'/post/{self.post.id}')
+
+        #then
+        number_of_posts_after_delete = len(Post.objects.all())
+        assert number_of_posts_after_delete == number_of_posts_before_delete - 1
