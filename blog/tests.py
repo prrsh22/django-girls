@@ -33,7 +33,7 @@ class PostTest(TestCase):
         Post.objects.create(author=self.admin, title="another", text="post")
 
         # when
-        get = self.client.get('')
+        get = self.client.get('/post')
 
         # then
         assert get.status_code == status.HTTP_200_OK
@@ -44,7 +44,7 @@ class PostTest(TestCase):
         self.client.force_login(user=self.admin)
 
         #when
-        created_post = self.client.post('/new_post', {'title': '', 'text': ''})
+        created_post = self.client.post('/post', {'title': 'test title', 'text': 'test text', 'author': self.admin.id})
 
         #then
         assert created_post.status_code == 201
@@ -55,7 +55,7 @@ class PostTest(TestCase):
         post_number_before_create = len(Post.objects.all())
 
         #when
-        created_post = self.client.post('/new_post', {'title': '', 'text': ''})
+        created_post = self.client.post('/post', {'title': 'test2', 'text': 'test2 text', 'author': self.admin.id})
 
         #then
         post_number_after_create = len(Post.objects.all())
