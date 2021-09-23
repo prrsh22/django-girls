@@ -6,8 +6,13 @@ post_list = views.PostViewSet.as_view({
     'post': 'create'
 })
 
+post_detail = views.PostViewSet.as_view({
+    'get': 'retrieve',
+    'patch': 'patch',
+    'delete': 'destroy'
+})
+
 urlpatterns = [
-    path('', post_list, name='post_viewset'),
-    path('post/<int:pk>', views.post_detail, name='post_detail'),
-    path('new_post', views.new_post, name='new_post')
+    path('post', post_list, name='post_list'),
+    path('post/<int:pk>', post_detail, name='post_detail'),
 ]
