@@ -11,7 +11,7 @@ class PostViewSet(viewsets.ModelViewSet):
     serializer_class = PostSerializer
     queryset = Post.objects.all()
 
-    def patch(self, request, *args, **kwargs):
+    def partial_update(self, request, *args, **kwargs):
         post = self.get_object()
         post.publish()
         return super().partial_update(request, *args, **kwargs)
