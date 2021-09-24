@@ -1,18 +1,9 @@
+from django.conf.urls import url
 from django.urls import path
 from . import views
+from rest_framework import routers
 
-post_list = views.PostViewSet.as_view({
-    'get': 'list',
-    'post': 'create'
-})
+router = routers.DefaultRouter()
+router.register(r'post', views.PostViewSet, basename="post")
 
-post_detail = views.PostViewSet.as_view({
-    'get': 'retrieve',
-    'patch': 'patch',
-    'delete': 'destroy'
-})
-
-urlpatterns = [
-    path('post', post_list, name='post_list'),
-    path('post/<int:pk>', post_detail, name='post_detail'),
-]
+urlpatterns = router.urls
