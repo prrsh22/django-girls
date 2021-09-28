@@ -97,3 +97,10 @@ class PostTest(TestCase):
         #then
         number_of_posts_after_delete = Post.objects.count()
         assert number_of_posts_after_delete == number_of_posts_before_delete - 1
+
+    def test_category가_주어지면_title_앞에_붙는다(self):
+        #when
+        self.client.post('/post/', {"category": "야구", "title": "치킨", "text": "yeah", 'author': self.admin.id})
+        
+        #then
+        assert Post.objects.last().title == "[야구] 치킨"
