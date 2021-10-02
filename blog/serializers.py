@@ -2,11 +2,14 @@ from rest_framework import serializers
 from .models import Post
 
 class PostSerializer(serializers.ModelSerializer):
+    title_with_category = serializers.SerializerMethodField('get_title_with_category')
+
     class Meta:
         model = Post
-        fields = "__all__"
-    
-    def create(self, validated_data):
-        if 'category' in self.context['request'].data:
-            validated_data['title'] = '[' + self.context['request'].data['category']+'] ' + validated_data['title']
-        return super().create(validated_data)
+        fields = ("id", "author", "title", "text", "created_date", "published_date", "title_with_category", "category")
+        extra_kwargs = {
+            'category': {'write_only': True}
+        }
+        
+    def get_title_with_category(self, post):
+        return f'[{post.category}] {post.title}'
