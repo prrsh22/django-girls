@@ -12,6 +12,8 @@ class PostSerializer(serializers.ModelSerializer):
         }
     
     def validate(self, attrs):
+        if ("야구" in attrs["title"] and "야구" not in attrs["category"]):
+            raise serializers.ValidationError("The category of the post with title containing 야구 should be 야구.")
         return super().validate(attrs)
     
     def validate_title(self, value):
